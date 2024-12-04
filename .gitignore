@@ -2,3 +2,4 @@ server-v2 copy 2.py
 __pycache__/models.cpython-311.pyc
 secrets.json
 __pycache__/spotify_utils.cpython-311.pyc
+.cache

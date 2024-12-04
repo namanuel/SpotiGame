@@ -9,8 +9,7 @@
 </head>
 <body>
     <div class="container mt-5">
-        <h1>SpotifyGame Playlist</h1>
-        <a href="/" class="btn btn-primary mb-3">Back to Home</a>
+        <h1>Spotify Guessing Game</h1>
         
         <!-- Display Unique User Names -->
         <h3>Users who added songs:</h3>
@@ -24,7 +23,6 @@
                     <tr>
                         <th>Song Name</th>
                         <th>Artist</th>
-                        <th>Link</th>
                         <th>Your Guess</th>
                         <th>Result</th>
                     </tr>
@@ -35,6 +33,7 @@
             </table>
             <h3>Total Points: <span id="total-points">0</span></h3>
         </div>
+        <a href="/" class="btn btn-primary mb-3">Back to Home</a>
     </div>
 
     <script>
@@ -66,11 +65,10 @@
                         const locked = gameData.locked[trackId] || false;  // Get lock state
                         const result = gameData.results[trackId] || '';  // Get result if available
 
-                        const row = `
+                        const row = ` 
                             <tr>
                                 <td>${song.name}</td>
                                 <td>${song.artist}</td>
-                                <td><a href="${song.url}" target="_blank">Listen</a></td>
                                 <td>
                                     <input type="text" class="form-control guess-input" data-track-id="${trackId}" value="${userGuess}" ${locked ? 'disabled' : ''}>
                                     <button class="btn btn-secondary mt-1 guess-btn" data-track-id="${trackId}" data-added-by="${song.added_by.join(',')}" ${locked ? 'disabled' : ''}>
@@ -105,46 +103,52 @@
         // Event listener for checking guesses
         $(document).on('click', '.guess-btn', function() {
             const trackId = $(this).data('track-id');
-            const addedBy = $(this).data('added-by').split(',');
+            const addedBy = $(this).data('added-by').split(','); // Users who added the song
             const userGuess = $(`input[data-track-id="${trackId}"]`).val().trim();
             const resultCell = $(`#result-${trackId}`);
             const inputField = $(`input[data-track-id="${trackId}"]`);
             const button = $(this);
 
+            // Clear previous result styling (if any)
+            resultCell.removeClass('text-danger text-success');
+
+            // Check if the user has entered a guess
             if (!userGuess) {
-                resultCell.text(`Please enter a guess.`).addClass('text-danger').removeClass('text-success');
+                resultCell.text('Please enter a guess.').addClass('text-danger');
                 return;
             }
 
-            // Reset the result styling if the user is trying again after an invalid guess
-            resultCell.removeClass('text-danger').removeClass('text-success');
-
-            // Check if the entered name is valid (i.e., it's a user who added the song)
-            if (!addedBy.includes(userGuess)) {
-                resultCell.text(`Invalid input! Try again.`).addClass('text-danger').removeClass('text-success');
-                return;
+            // Check if the guess is a valid user who added any song
+            if (!uniqueUsers.has(userGuess)) {
+                resultCell.text('Invalid input! This is not a valid user.').addClass('text-danger');
+                return;  // Allow the user to try again without locking the input
             }
 
-            // If valid, check the guess
+            // Now check if the guessed user is correct for this song
             let resultText = 'Wrong!';
             if (addedBy.includes(userGuess)) {
                 resultText = `Correct! ${userGuess} added this song.`;
                 gameData.points++;  // Increase points for correct guess
+                resultCell.addClass('text-success');
+            } else {
+                resultCell.addClass('text-danger');
             }
 
-            resultCell.text(resultText).addClass(resultText === 'Correct!' ? 'text-success' : 'text-danger').removeClass(resultText === 'Correct!' ? 'text-danger' : 'text-success');
+            // Update the result cell
+            resultCell.text(resultText);
+            //resultCell.text(resultText).addClass(resultText === 'Correct!' ? 'text-success' : 'text-danger');
 
             // Store the guess and result
             gameData.guesses[trackId] = userGuess;
             gameData.results[trackId] = resultText;
 
-            // Lock the input and button
-            gameData.locked[trackId] = userGuess;
+            // Lock the input and button after the first guess (valid or not)
+            gameData.locked[trackId] = true;
 
             // Update total points on the page
             $('#total-points').text(gameData.points);
 
-            // Disable input and button after the first guess
+            // Disable input and button after the first guess (valid or invalid)
             inputField.prop('disabled', true);
             button.prop('disabled', true);
 
