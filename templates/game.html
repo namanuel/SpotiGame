@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playlist Guessing Game</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>SpotifyGame Playlist</h1>
+        <a href="/" class="btn btn-primary mb-3">Back to Home</a>
+        
+        <!-- Display Unique User Names -->
+        <h3>Users who added songs:</h3>
+        <div id="users-list" class="mb-3">
+            <!-- Unique users will be displayed here -->
+        </div>
+
+        <div id="playlist-container">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Song Name</th>
+                        <th>Artist</th>
+                        <th>Link</th>
+                        <th>Your Guess</th>
+                        <th>Result</th>
+                    </tr>
+                </thead>
+                <tbody id="playlist-table-body">
+                    <!-- Songs will be loaded here dynamically -->
+                </tbody>
+            </table>
+            <h3>Total Points: <span id="total-points">0</span></h3>
+        </div>
+    </div>
+
+    <script>
+        // Load data from localStorage or initialize if not present
+        let gameData = JSON.parse(localStorage.getItem('gameData')) || { points: 0, guesses: {}, locked: {}, results: {} };
+        let uniqueUsers = new Set();  // To track unique users who added songs
+
+        // Display stored points
+        $('#total-points').text(gameData.points);
+
+        // Function to fetch and update the playlist
+        function updatePlaylist() {
+            $.ajax({
+                url: '/playlist-data',
+                method: 'GET',
+                success: function(data) {
+                    const songs = JSON.parse(data);
+                    const tableBody = $('#playlist-table-body');
+                    tableBody.empty(); // Clear the table before appending new data
+
+                    songs.forEach(song => {
+                        // Track all users who added songs
+                        song.added_by.forEach(user => {
+                            uniqueUsers.add(user);  // Add each user to the set
+                        });
+
+                        const trackId = song.id;
+                        const userGuess = gameData.guesses[trackId] || '';  // Get stored guess if available
+                        const locked = gameData.locked[trackId] || false;  // Get lock state
+                        const result = gameData.results[trackId] || '';  // Get result if available
+
+                        const row = `
+                            <tr>
+                                <td>${song.name}</td>
+                                <td>${song.artist}</td>
+                                <td><a href="${song.url}" target="_blank">Listen</a></td>
+                                <td>
+                                    <input type="text" class="form-control guess-input" data-track-id="${trackId}" value="${userGuess}" ${locked ? 'disabled' : ''}>
+                                    <button class="btn btn-secondary mt-1 guess-btn" data-track-id="${trackId}" data-added-by="${song.added_by.join(',')}" ${locked ? 'disabled' : ''}>
+                                        Check Guess
+                                    </button>
+                                </td>
+                                <td id="result-${trackId}">${result}</td>
+                            </tr>
+                        `;
+                        tableBody.append(row);
+                    });
+
+                    // Update the list of unique users who added songs
+                    updateUsersList();
+                },
+                error: function(err) {
+                    console.error('Error fetching playlist data:', err);
+                }
+            });
+        }
+
+        // Function to update the displayed list of unique users
+        function updateUsersList() {
+            const usersListDiv = $('#users-list');
+            usersListDiv.empty(); // Clear the list before appending new data
+
+            uniqueUsers.forEach(user => {
+                usersListDiv.append(`<span class="badge bg-info me-2">${user}</span>`);
+            });
+        }
+
+        // Event listener for checking guesses
+        $(document).on('click', '.guess-btn', function() {
+            const trackId = $(this).data('track-id');
+            const addedBy = $(this).data('added-by').split(',');
+            const userGuess = $(`input[data-track-id="${trackId}"]`).val().trim();
+            const resultCell = $(`#result-${trackId}`);
+            const inputField = $(`input[data-track-id="${trackId}"]`);
+            const button = $(this);
+
+            if (!userGuess) {
+                resultCell.text(`Please enter a guess.`).addClass('text-danger').removeClass('text-success');
+                return;
+            }
+
+            // Reset the result styling if the user is trying again after an invalid guess
+            resultCell.removeClass('text-danger').removeClass('text-success');
+
+            // Check if the entered name is valid (i.e., it's a user who added the song)
+            if (!addedBy.includes(userGuess)) {
+                resultCell.text(`Invalid input! Try again.`).addClass('text-danger').removeClass('text-success');
+                return;
+            }
+
+            // If valid, check the guess
+            let resultText = 'Wrong!';
+            if (addedBy.includes(userGuess)) {
+                resultText = `Correct! ${userGuess} added this song.`;
+                gameData.points++;  // Increase points for correct guess
+            }
+
+            resultCell.text(resultText).addClass(resultText === 'Correct!' ? 'text-success' : 'text-danger').removeClass(resultText === 'Correct!' ? 'text-danger' : 'text-success');
+
+            // Store the guess and result
+            gameData.guesses[trackId] = userGuess;
+            gameData.results[trackId] = resultText;
+
+            // Lock the input and button
+            gameData.locked[trackId] = userGuess;
+
+            // Update total points on the page
+            $('#total-points').text(gameData.points);
+
+            // Disable input and button after the first guess
+            inputField.prop('disabled', true);
+            button.prop('disabled', true);
+
+            // Save the updated game data to localStorage
+            localStorage.setItem('gameData', JSON.stringify(gameData));
+        });
+
+        // Initial fetch and periodic updates (disabled refresh)
+        updatePlaylist(); // Fetch once on page load
+    </script>
+</body>
+</html>

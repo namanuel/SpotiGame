@@ -1,0 +1,7 @@
+Flask
+Flask-SQLAlchemy
+Flask-Migrate
+spotipy
+python-dotenv
+requests
+flask-wtf

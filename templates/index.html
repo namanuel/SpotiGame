@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spotify Playlist Game</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <script>
+        // Clear local storage as soon as the page is loaded
+        window.onload = function() {
+            localStorage.clear();  // Clears all data from localStorage
+        }
+    </script>
+    <style>
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;  /* Adds space between the buttons */
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Spotify Playlist Game</h1>
+        </header>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <div class="form-container">
+            <form action="/add-song" method="POST">
+                <label for="track_url">Enter Spotify Track URL:</label>
+                <input type="text" id="track_url" name="track_url" required>
+                <button type="submit">Add Song</button>
+            </form>
+        </div>
+
+        <!-- Container for buttons, now centered -->
+        <div class="button-container">
+            <div class="form-container">
+                <a href="/game">
+                    <button type="button" class="btn btn-primary">Go to the Game</button>
+                </a>
+            </div>
+
+            <div class="form-container">
+                <a href="/added-songs">
+                    <button type="button" class="btn btn-primary">View Added Songs</button>
+                </a>
+            </div>
+        </div>
+
+    </div>
+</body>
+</html>
