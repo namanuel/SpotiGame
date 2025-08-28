@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spotify Playlist Game</title>
+    <title>Spotify-GuessWho!</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <script>
         // Clear local storage as soon as the page is loaded
@@ -12,20 +12,90 @@
         }
     </script>
     <style>
+        body {
+            background: linear-gradient(135deg, #232526 0%, #414345 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            padding: 40px 30px 30px 30px;
+            margin-top: 40px;
+        }
+        h1, h3, h4, h5 {
+            color: #232526;
+            font-weight: 700;
+        }
+        .main-btn {
+            width: 100%;
+            margin-bottom: 18px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            border-radius: 8px;
+            background: linear-gradient(90deg, #36d1c4 0%, #5b86e5 100%);
+            color: #fff;
+            border: none;
+            transition: background 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(91,134,229,0.08);
+        }
+        .main-btn:hover, .main-btn:focus {
+            background: linear-gradient(90deg, #5b86e5 0%, #36d1c4 100%);
+            color: #fff;
+        }
+        .btn-danger.main-btn {
+            background: linear-gradient(90deg, #ff5858 0%, #f09819 100%);
+        }
+        .btn-danger.main-btn:hover, .btn-danger.main-btn:focus {
+            background: linear-gradient(90deg, #f09819 0%, #ff5858 100%);
+        }
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        .flash {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            font-size: 15px;
+            text-align: center;
+        }
+        .flash.success {
+            background-color: #36d1c4;
+            color: white;
+        }
+        .flash.error, .flash.danger {
+            background-color: #ff5858;
+            color: white;
+        }
+        .flash.info {
+            background-color: #5b86e5;
+            color: white;
+        }
         .button-container {
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 20px;  /* Adds space between the buttons */
-            margin-top: 50px;
+            gap: 16px;
+            margin-top: 30px;
+        }
+        .form-container {
+            width: 100%;
+        }
+        @media (min-width: 600px) {
+            .container {
+                max-width: 500px;
+            }
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255,145,77,0.4); }
+            70% { box-shadow: 0 0 0 12px rgba(255,145,77,0); }
+            100% { box-shadow: 0 0 0 0 rgba(255,145,77,0); }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Spotify Playlist Game</h1>
+            <h1>Spotify-GuessWho!</h1>
         </header>
 
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -38,26 +108,27 @@
             {% endif %}
         {% endwith %}
 
-        <div class="form-container">
-            <form action="/add-song" method="POST">
-                <label for="track_url">Enter Spotify Track URL:</label>
-                <input type="text" id="track_url" name="track_url" required>
-                <button type="submit">Add Song</button>
-            </form>
-        </div>
-
-        <!-- Container for buttons, now centered -->
         <div class="button-container">
             <div class="form-container">
                 <a href="/game">
-                    <button type="button" class="btn btn-primary">Go to the Game</button>
+                    <button type="button" class="main-btn" style="background: linear-gradient(90deg, #ffde59 0%, #ff914d 100%); color: #232526; font-size: 1.3rem; font-weight: 700; box-shadow: 0 4px 16px rgba(255,145,77,0.18); border: 2px solid #ff914d; animation: pulse 1.2s infinite;">
+                        🎵 Play Game 🎮
+                    </button>
                 </a>
             </div>
-
             <div class="form-container">
-                <a href="/added-songs">
-                    <button type="button" class="btn btn-primary">View Added Songs</button>
-                </a>
+                <form action="/add-top-tracks" method="POST" style="margin:0;">
+                    <button type="submit" class="main-btn" style="background: linear-gradient(90deg, #5b86e5 0%, #36d1c4 100%); color: #fff; font-size: 1.1rem; font-weight: 600; border: 2px solid #36d1c4; box-shadow: 0 2px 8px rgba(91,134,229,0.12);">
+                        🎶 Add My Top Songs
+                    </button>
+                </form>
+            </div>
+            <div class="form-container">
+                <form action="/shuffle-add-all" method="POST" style="margin:0;">
+                    <button type="submit" class="main-btn" style="background: linear-gradient(90deg, #36d1c4 0%, #5b86e5 100%); color: #fff; font-size: 1.1rem; font-weight: 600; border: 2px solid #5b86e5; box-shadow: 0 2px 8px rgba(91,134,229,0.12);">
+                        🔀 Shuffle & Add All Songs
+                    </button>
+                </form>
             </div>
         </div>
 

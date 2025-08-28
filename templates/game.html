@@ -3,161 +3,182 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Playlist Guessing Game</title>
+    <title>Spotify-GuessWho!</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        body {
+            background: linear-gradient(135deg, #232526 0%, #414345 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        .game-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .game-card {
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            padding: 36px 32px 32px 32px;
+            max-width: 420px;
+            width: 100%;
+            margin-bottom: 32px;
+            text-align: center;
+            position: relative;
+        }
+        .song-art {
+            width: 120px;
+            height: 120px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(91,134,229,0.12);
+            margin-bottom: 18px;
+            object-fit: cover;
+        }
+        .song-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #232526;
+        }
+        .song-artist {
+            font-size: 1.1rem;
+            color: #5b86e5;
+            margin-bottom: 8px;
+        }
+        .main-btn {
+            width: 100%;
+            margin-bottom: 18px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            border-radius: 8px;
+            background: linear-gradient(90deg, #36d1c4 0%, #5b86e5 100%);
+            color: #fff;
+            border: none;
+            transition: background 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(91,134,229,0.08);
+        }
+        .main-btn:hover, .main-btn:focus {
+            background: linear-gradient(90deg, #5b86e5 0%, #36d1c4 100%);
+            color: #fff;
+        }
+        .guess-feedback {
+            min-height: 32px;
+            margin-bottom: 10px;
+            font-size: 1.08rem;
+            transition: color 0.2s;
+        }
+        .score-box {
+            background: linear-gradient(90deg, #36d1c4 0%, #5b86e5 100%);
+            color: #fff;
+            border-radius: 8px;
+            padding: 8px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 18px;
+        }
+        .leaderboard-card {
+            background: #f8f9fa;
+            border-radius: 16px;
+            box-shadow: 0 2px 8px rgba(91,134,229,0.06);
+            padding: 24px 20px 18px 20px;
+            max-width: 340px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .leaderboard-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #232526;
+            margin-bottom: 12px;
+        }
+        .list-group-item {
+            background: transparent;
+            border: none;
+            font-size: 1.05rem;
+        }
+        @media (max-width: 600px) {
+            .game-card, .leaderboard-card {
+                max-width: 98vw;
+                padding: 18px 6vw 18px 6vw;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-5">
-        <h1>Spotify Guessing Game</h1>
-        
-        <!-- Display Unique User Names -->
-        <h3>Users who added songs:</h3>
-        <div id="users-list" class="mb-3">
-            <!-- Unique users will be displayed here -->
+<div class="game-wrapper">
+    <div class="game-card">
+        <h2 class="mb-3">Spotify-GuessWho!</h2>
+        {% if song %}
+        <div id="current-song-container">
+            {% if song.album_image %}
+                <img src="{{ song.album_image }}" alt="Album Art" class="song-art mb-2">
+            {% endif %}
+            <div class="song-title">{{ song.name }}</div>
+            <div class="song-artist">by {{ song.artist }}</div>
+            <a href="{{ song.url }}" target="_blank" style="font-size:0.98rem;">Open in Spotify</a>
         </div>
-
-        <div id="playlist-container">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <th>Song Name</th>
-                        <th>Artist</th>
-                        <th>Your Guess</th>
-                        <th>Result</th>
-                    </tr>
-                </thead>
-                <tbody id="playlist-table-body">
-                    <!-- Songs will be loaded here dynamically -->
-                </tbody>
-            </table>
-            <h3>Total Points: <span id="total-points">0</span></h3>
-        </div>
-        <a href="/" class="btn btn-primary mb-3">Back to Home</a>
+        <form method="POST" action="{{ url_for('guess_song') }}" class="mt-3" id="guess-form">
+            <label for="guess_user" class="form-label mb-1">Who added this song?</label>
+            <select id="guess_user" name="guess_user" class="form-select mb-3" required>
+                {% for user in users %}
+                    <option value="{{ user }}">{{ user }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" class="main-btn">Submit Guess</button>
+        </form>
+        <div id="guess-feedback"></div>
+        {% else %}
+        <div class="alert alert-warning mt-3">No song currently playing.</div>
+        {% endif %}
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            <div class="mt-3">
+              {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+              {% endfor %}
+            </div>
+          {% endif %}
+        {% endwith %}
     </div>
-
-    <script>
-        // Load data from localStorage or initialize if not present
-        let gameData = JSON.parse(localStorage.getItem('gameData')) || { points: 0, guesses: {}, locked: {}, results: {} };
-        let uniqueUsers = new Set();  // To track unique users who added songs
-
-        // Display stored points
-        $('#total-points').text(gameData.points);
-
-        // Function to fetch and update the playlist
-        function updatePlaylist() {
-            $.ajax({
-                url: '/playlist-data',
-                method: 'GET',
-                success: function(data) {
-                    const songs = JSON.parse(data);
-                    const tableBody = $('#playlist-table-body');
-                    tableBody.empty(); // Clear the table before appending new data
-
-                    songs.forEach(song => {
-                        // Track all users who added songs
-                        song.added_by.forEach(user => {
-                            uniqueUsers.add(user);  // Add each user to the set
-                        });
-
-                        const trackId = song.id;
-                        const userGuess = gameData.guesses[trackId] || '';  // Get stored guess if available
-                        const locked = gameData.locked[trackId] || false;  // Get lock state
-                        const result = gameData.results[trackId] || '';  // Get result if available
-
-                        const row = ` 
-                            <tr>
-                                <td>${song.name}</td>
-                                <td>${song.artist}</td>
-                                <td>
-                                    <input type="text" class="form-control guess-input" data-track-id="${trackId}" value="${userGuess}" ${locked ? 'disabled' : ''}>
-                                    <button class="btn btn-secondary mt-1 guess-btn" data-track-id="${trackId}" data-added-by="${song.added_by.join(',')}" ${locked ? 'disabled' : ''}>
-                                        Check Guess
-                                    </button>
-                                </td>
-                                <td id="result-${trackId}">${result}</td>
-                            </tr>
-                        `;
-                        tableBody.append(row);
-                    });
-
-                    // Update the list of unique users who added songs
-                    updateUsersList();
-                },
-                error: function(err) {
-                    console.error('Error fetching playlist data:', err);
+    <div class="leaderboard-card">
+        <div class="leaderboard-title">Leaderboard</div>
+        <ul id="leaderboard-list" class="list-group">
+            <!-- Leaderboard will be loaded here by JS -->
+        </ul>
+    </div>
+</div>
+<script>
+    // --- Real-time song and leaderboard update ---
+    function fetchGameState() {
+        fetch('/current-song').then(r => r.json()).then(data => {
+            if (data && data.name) {
+                document.querySelector('.song-title').textContent = data.name;
+                document.querySelector('.song-artist').textContent = 'by ' + data.artist;
+                document.querySelector('.song-art').src = data.album_image || '';
+                document.querySelector('.song-art').style.display = data.album_image ? '' : 'none';
+                document.querySelector('.song-title').parentElement.querySelector('a').href = data.url;
+                // Update guess options
+                let guessUser = document.getElementById('guess_user');
+                if (guessUser) {
+                    guessUser.innerHTML = (data.added_by || []).map(u => `<option value="${u}">${u}</option>`).join('');
                 }
-            });
-        }
-
-        // Function to update the displayed list of unique users
-        function updateUsersList() {
-            const usersListDiv = $('#users-list');
-            usersListDiv.empty(); // Clear the list before appending new data
-
-            uniqueUsers.forEach(user => {
-                usersListDiv.append(`<span class="badge bg-info me-2">${user}</span>`);
-            });
-        }
-
-        // Event listener for checking guesses
-        $(document).on('click', '.guess-btn', function() {
-            const trackId = $(this).data('track-id');
-            const addedBy = $(this).data('added-by').split(','); // Users who added the song
-            const userGuess = $(`input[data-track-id="${trackId}"]`).val().trim();
-            const resultCell = $(`#result-${trackId}`);
-            const inputField = $(`input[data-track-id="${trackId}"]`);
-            const button = $(this);
-
-            // Clear previous result styling (if any)
-            resultCell.removeClass('text-danger text-success');
-
-            // Check if the user has entered a guess
-            if (!userGuess) {
-                resultCell.text('Please enter a guess.').addClass('text-danger');
-                return;
             }
-
-            // Check if the guess is a valid user who added any song
-            if (!uniqueUsers.has(userGuess)) {
-                resultCell.text('Invalid input! This is not a valid user.').addClass('text-danger');
-                return;  // Allow the user to try again without locking the input
-            }
-
-            // Now check if the guessed user is correct for this song
-            let resultText = 'Wrong!';
-            if (addedBy.includes(userGuess)) {
-                resultText = `Correct! ${userGuess} added this song.`;
-                gameData.points++;  // Increase points for correct guess
-                resultCell.addClass('text-success');
-            } else {
-                resultCell.addClass('text-danger');
-            }
-
-            // Update the result cell
-            resultCell.text(resultText);
-            //resultCell.text(resultText).addClass(resultText === 'Correct!' ? 'text-success' : 'text-danger');
-
-            // Store the guess and result
-            gameData.guesses[trackId] = userGuess;
-            gameData.results[trackId] = resultText;
-
-            // Lock the input and button after the first guess (valid or not)
-            gameData.locked[trackId] = true;
-
-            // Update total points on the page
-            $('#total-points').text(gameData.points);
-
-            // Disable input and button after the first guess (valid or invalid)
-            inputField.prop('disabled', true);
-            button.prop('disabled', true);
-
-            // Save the updated game data to localStorage
-            localStorage.setItem('gameData', JSON.stringify(gameData));
         });
-
-        // Initial fetch and periodic updates (disabled refresh)
-        updatePlaylist(); // Fetch once on page load
-    </script>
+        fetch('/leaderboard').then(r => r.json()).then(data => {
+            let html = '';
+            data.forEach(function(entry, idx) {
+                html += `<li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>${idx+1}. ${entry[0]}</span>
+                    <span class="badge bg-primary rounded-pill">${entry[1]}</span>
+                </li>`;
+            });
+            document.getElementById('leaderboard-list').innerHTML = html;
+        });
+    }
+    setInterval(fetchGameState, 3000);
+    fetchGameState();
+</script>
 </body>
 </html>

@@ -1,9 +1,10 @@
+<!-- Manual entry form for 5 Spotify track URLs -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Spotify-GuessWho!</title>
+    <title>Enter Your Top 5 Tracks - Spotify-GuessWho!</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <style>
         body {
@@ -84,15 +85,20 @@
 <body>
     <div class="container">
         <header>
-            <h1>Spotify-GuessWho! - Login</h1>
+            <h1>Enter Your Top 5 Tracks - Spotify-GuessWho!</h1>
         </header>
-
+        <form action="" method="POST">
+            {% for i in range(1, 6) %}
+                <div class="form-container">
+                    <label for="track_url_{{ i }}">Track {{ i }} Spotify URL:</label>
+                    <input type="text" id="track_url_{{ i }}" name="track_url_{{ i }}" placeholder="https://open.spotify.com/track/...">
+                </div>
+            {% endfor %}
+            <button type="submit" class="btn btn-success">Add Tracks</button>
+        </form>
         <div class="button-container">
             <div class="form-container">
-                <a href="/login"><button type="button" class="main-btn">Login with Spotify</button></a>
-            </div>
-            <div class="form-container">
-                <a href="/"><button type="button" class="main-btn btn-danger">Back to Home</button></a>
+                <a href="/"><button type="button" class="main-btn">Back to Home</button></a>
             </div>
         </div>
     </div>

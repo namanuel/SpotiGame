@@ -1,67 +1,67 @@
-# Spotify Playlist Guessing Game 🎶🎮
+# Spotify-GuessWho! 🎵🎮
 
-Welcome to the **Spotify Playlist Guessing Game**, a fun and interactive way to engage with your favorite music and discover who added which song to a playlist! 🎧✨
+A multiplayer Spotify guessing game web app built with Flask and Spotipy.
 
-## How it Works 🎼
+## Features
+- **Spotify OAuth login**: Each player logs in securely with their own Spotify account.
+- **Add your top tracks**: Players can add their top Spotify songs or enter tracks manually.
+- **Multiplayer playlist**: All players' tracks are pooled and shuffled into a shared playlist.
+- **Guess who added the song**: During the game, guess which player added the currently playing track.
+- **Real-time leaderboard**: See live scores and compete for the top spot.
+- **Modern UI**: Beautiful, responsive design with standout buttons and easy navigation.
+- **Secure**: CSRF protection, secure session cookies, and minimal dependencies.
 
-The game revolves around **Spotify playlists** that you can add to and guess who added each song. Here's how you can play:
+## How to Play
+1. **Login**: Click "Login with Spotify" and authorize the app.
+2. **Add Songs**: Use "Add My Top Songs" to add your top tracks, or enter songs manually.
+3. **Shuffle & Add All Songs**: When all players have added tracks, shuffle and add them to the playlist.
+4. **Play Game**: Click "Play Game" to start guessing who added each song.
+5. **Leaderboard**: Track your score and see who’s winning in real time.
 
-1. **Add Songs**: You can submit your favorite songs by entering their Spotify URLs. These tracks will be added to a playlist that all players will guess from.
-2. **Guess the Contributor**: Once the playlist is created, players will have to guess **who added each song** by typing in the name of the contributor. If you guess correctly, you earn points!
-3. **Track Your Progress**: The app keeps track of how many points you've earned as you successfully guess who added which songs. 
+## Setup Instructions
+1. **Clone the repository**
+   ```sh
+   git clone https://github.com/namanuel/SpotiGame.git
+   cd SpotiGame
+   ```
+2. **Install dependencies**
+   ```sh
+   pip install -r requirements.txt
+   ```
+3. **Create and configure `secrets.json`**
+   - Copy `secrets-template.json` to `secrets.json`.
+   - Fill in your Spotify Client ID, Client Secret, and a Flask secret key.
+   - Example:
+     ```json
+     {
+       "SPOTIFY_CLIENT_ID": "your_client_id",
+       "SPOTIFY_CLIENT_SECRET": "your_client_secret",
+       "FLASK_SECRET_KEY": "your_flask_secret_key"
+     }
+     ```
+4. **Set your redirect URI**
+   - In your Spotify Developer Dashboard, add your device’s IP and port as a redirect URI (e.g. `http://10.0.100.233:5000/callback`).
+   - Make sure this matches the value in your `server.py`.
+5. **Run the app**
+   ```sh
+   python server.py
+   ```
+6. **Access the app**
+   - Open your browser and go to `http://<your-ip>:5000`.
+
+## Notes
+- All players must be on the same network and able to access the server’s IP/port.
+- Spotify only allows redirect URIs that are explicitly set in the developer dashboard.
+- For best results, use a static IP for your server.
+
+## Tech Stack
+- **Backend**: Python, Flask, Spotipy
+- **Frontend**: HTML, CSS (custom + Bootstrap)
+- **Storage**: JSON file for leaderboard
+
+## License
+MIT
 
 ---
 
-## Features 🎉
-
-- **Add Your Own Songs**: Simply enter a Spotify track URL, and it will be added to the playlist for everyone to guess.
-- **Guess Who Added The Song**: When the game starts, you can guess who contributed each song by typing their name.
-- **Points System**: For every correct guess, you earn points, which are displayed live as you play.
-- **Leaderboard**: See your progress and compete with friends to become the top player in the game!
-
----
-
-## How to Play 🕹️
-
-1. **Add Songs**: Go to the "Add Song" section, paste a Spotify track URL, and click **Add Song**.
-2. **Play the Game**: Once songs are added, head over to the **Game** section where you will guess who added each song to the playlist.
-3. **Guess and Earn Points**: Type in the name of the person you think added the song. If you're correct, you'll get points!
-
----
-
-## Tech Stack 💻
-
-This app is built using the following technologies:
-- **Frontend**: HTML, CSS (with Bootstrap for responsive design), and JavaScript (with jQuery for interactivity).
-- **Backend**: Python (Flask) for the server-side logic.
-- **Database**: Local storage to save game data and progress.
-
----
-
-## Configuration Process 🛠️
-
-To get started with the Spotify Playlist Guessing Game, you need to **authorize** the app to interact with Spotify. Here's how you can set up the app:
-
-### Step 1: Create a Spotify Developer Account
-To begin, you need to create an account with **Spotify Developer**:
-1. Go to [Spotify for Developers](https://developer.spotify.com/).
-2. Sign up or log in with your Spotify account.
-3. Once logged in, create a new **Spotify App** by following the instructions provided by Spotify. You will get **Client ID** and **Client Secret** keys, which are essential for authorization.
-
-### Step 2: Set Up Spotify API
-1. In your newly created app on the Spotify Developer dashboard, configure the **Redirect URI**. This is where Spotify will send the user after authorization.
-   - Example: `http://localhost:5000/callback`
-2. Add this Redirect URI to your **app's Spotify settings** under the "Edit Settings" section.
-
-### Step 3: Authorize Your App
-- The game uses the **Spotify Web API** to fetch and manage playlists. To connect your app with Spotify:
-  1. Go to the **authorization page**.
-  2. Log in to your Spotify account.
-  3. Grant the necessary permissions for the app to read your playlists and track data.
-
-### Step 4: Integrate Your Client ID & Client Secret
-- In your **backend application** (Flask server), replace the placeholders with your actual **Client ID** and **Client Secret** obtained from the Spotify Developer dashboard.
-  ```python
-  CLIENT_ID = 'your_client_id'
-  CLIENT_SECRET = 'your_client_secret'
-  REDIRECT_URI = 'http://localhost:5000/callback'
+Enjoy playing Spotify-GuessWho! If you have issues or feature requests, open an issue or contact the maintainer.

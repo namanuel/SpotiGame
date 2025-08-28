@@ -3,13 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Added Songs</title>
+    <title>Added Songs - Spotify-GuessWho!</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #232526 0%, #414345 100%);
+            min-height: 100vh;
+        }
+        .container {
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+            padding: 40px 30px 30px 30px;
+            margin-top: 40px;
+        }
+        h1, h3, h4, h5 {
+            color: #232526;
+            font-weight: 700;
+        }
+        .main-btn {
+            width: 100%;
+            margin-bottom: 18px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            border-radius: 8px;
+            background: linear-gradient(90deg, #36d1c4 0%, #5b86e5 100%);
+            color: #fff;
+            border: none;
+            transition: background 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(91,134,229,0.08);
+        }
+        .main-btn:hover, .main-btn:focus {
+            background: linear-gradient(90deg, #5b86e5 0%, #36d1c4 100%);
+            color: #fff;
+        }
+        .btn-danger.main-btn {
+            background: linear-gradient(90deg, #ff5858 0%, #f09819 100%);
+        }
+        .btn-danger.main-btn:hover, .btn-danger.main-btn:focus {
+            background: linear-gradient(90deg, #f09819 0%, #ff5858 100%);
+        }
+        .flash-messages {
+            margin-bottom: 20px;
+        }
+        .flash {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 5px 0;
+            font-size: 15px;
+            text-align: center;
+        }
+        .flash.success {
+            background-color: #36d1c4;
+            color: white;
+        }
+        .flash.error, .flash.danger {
+            background-color: #ff5858;
+            color: white;
+        }
+        .flash.info {
+            background-color: #5b86e5;
+            color: white;
+        }
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-top: 30px;
+        }
+        .form-container {
+            width: 100%;
+        }
+        @media (min-width: 600px) {
+            .container {
+                max-width: 500px;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container mt-5">
-        <h1>Added Songs</h1>
-        <a href="/" class="btn btn-primary mb-3">Back to Home</a>
+        <h1>Added Songs - Spotify-GuessWho!</h1>
         {% if added_songs %}
             <table class="table table-striped">
                 <thead>
@@ -30,6 +104,11 @@
         {% else %}
             <p>No songs have been added yet.</p>
         {% endif %}
+        <div class="button-container">
+            <div class="form-container">
+                <a href="/"><button type="button" class="main-btn">Back to Home</button></a>
+            </div>
+        </div>
     </div>
 </body>
 </html>
