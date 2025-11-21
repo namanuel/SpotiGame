@@ -126,7 +126,10 @@
                     <option value="{{ user }}">{{ user }}</option>
                 {% endfor %}
             </select>
-            <button type="submit" class="main-btn">Submit Guess</button>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <div id="remaining-info" style="font-size:0.95rem;color:#555;">Guesses left: --</div>
+            </div>
+            <button type="submit" id="guess-submit" class="main-btn">Submit Guess</button>
         </form>
         <div id="guess-feedback"></div>
         {% else %}
@@ -150,22 +153,53 @@
     </div>
 </div>
 <script>
-    // --- Real-time song and leaderboard update ---
-    function fetchGameState() {
+    // --- Separate polling: current song (updates song details + dropdown)
+    function fetchCurrentSong() {
         fetch('/current-song').then(r => r.json()).then(data => {
             if (data && data.name) {
                 document.querySelector('.song-title').textContent = data.name;
                 document.querySelector('.song-artist').textContent = 'by ' + data.artist;
-                document.querySelector('.song-art').src = data.album_image || '';
-                document.querySelector('.song-art').style.display = data.album_image ? '' : 'none';
-                document.querySelector('.song-title').parentElement.querySelector('a').href = data.url;
-                // Update guess options
+                const artEl = document.querySelector('.song-art');
+                if (artEl) {
+                    artEl.src = data.album_image || '';
+                    artEl.style.display = data.album_image ? '' : 'none';
+                }
+                const link = document.querySelector('.song-title').parentElement.querySelector('a');
+                if (link) link.href = data.url;
+                // Update guess options (show all players) - ONLY updated by this function
                 let guessUser = document.getElementById('guess_user');
                 if (guessUser) {
-                    guessUser.innerHTML = (data.added_by || []).map(u => `<option value="${u}">${u}</option>`).join('');
+                    const players = data.players && data.players.length ? data.players : (data.added_by || []);
+                    // preserve current selection if still present
+                    const prev = guessUser.value;
+                    guessUser.innerHTML = players.map(u => `<option value="${u}">${u}</option>`).join('');
+                    if (prev && Array.from(guessUser.options).some(o => o.value === prev)) {
+                        guessUser.value = prev;
+                    }
+                }
+                // Update remaining guesses and disable button if none left
+                let remainingInfo = document.getElementById('remaining-info');
+                let submitBtn = document.getElementById('guess-submit');
+                if (remainingInfo && typeof data.remaining_guesses !== 'undefined') {
+                    remainingInfo.textContent = `Guesses left: ${data.remaining_guesses}`;
+                    if (submitBtn) {
+                        if (data.remaining_guesses <= 0) {
+                            submitBtn.disabled = true;
+                            submitBtn.style.opacity = '0.6';
+                            submitBtn.style.pointerEvents = 'none';
+                        } else {
+                            submitBtn.disabled = false;
+                            submitBtn.style.opacity = '';
+                            submitBtn.style.pointerEvents = '';
+                        }
+                    }
                 }
             }
         });
+    }
+
+    // --- Leaderboard polling: updates only the leaderboard list ---
+    function fetchLeaderboard() {
         fetch('/leaderboard').then(r => r.json()).then(data => {
             let html = '';
             data.forEach(function(entry, idx) {
@@ -177,8 +211,12 @@
             document.getElementById('leaderboard-list').innerHTML = html;
         });
     }
-    setInterval(fetchGameState, 3000);
-    fetchGameState();
+
+    // Polls
+    fetchCurrentSong();
+    fetchLeaderboard();
+    setInterval(fetchCurrentSong, 5000); // update song + dropdown occasionally
+    setInterval(fetchLeaderboard, 3000); // refresh leaderboard more frequently
 </script>
 </body>
 </html>
