@@ -436,7 +436,10 @@ def add_top_tracks():
     try:
         api_user = sp.current_user()
         print('DEBUG: Spotify API user =', api_user.get('id'), api_user.get('display_name'))
-        top_tracks = sp.current_user_top_tracks(limit=5, time_range='short_term').get('items', [])
+        # Request the user's top 5 tracks over the long-term (all-time).
+        # Spotify supports short_term, medium_term and long_term. There's no exact
+        # 12-month window, so long_term is the closest to "whole year" / all-time.
+        top_tracks = sp.current_user_top_tracks(limit=5, time_range='long_term').get('items', [])
     except Exception as e:
         flash("Could not fetch your top tracks from Spotify. Please enter 5 tracks manually.", 'warning')
         return redirect(url_for('manual_top_tracks'))
@@ -459,7 +462,7 @@ def add_top_tracks():
     }
     save_song_queue(song_queue)
     
-    flash(f"Your top 5 tracks have been saved. {len(song_queue)} players have submitted tracks!", 'success')
+    flash(f"Your top 5 (long-term) tracks have been saved. {len(song_queue)} players have submitted tracks!", 'success')
     return redirect(url_for('home'))
 
 # Route: Shuffle and add all players' top tracks to the playlist in interleaved order
